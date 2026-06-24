@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+const base = import.meta.env.BASE_URL;
 
 const experience = [
   {
@@ -81,7 +82,7 @@ const education = [
       <!-- Photo -->
       <aside class="about__photo-col">
         <div class="photo-frame">
-          <img src="/polaroid.png" alt="Mackenzie Hart" class="photo-img" />
+          <img src={`${base}polaroid.png`} alt="Mackenzie Hart" class="photo-img" />
         </div>
       </aside>
 
@@ -112,7 +113,7 @@ const education = [
           </div>
         </section>
 
-        <a href="/resume.pdf" class="resume__download" download="Mackenzie Hart Resume 2026.pdf">
+        <a href={`${base}resume.pdf`} class="resume__download" download="Mackenzie Hart Resume 2026.pdf">
           Download résumé <span aria-hidden="true">↓</span>
         </a>
 

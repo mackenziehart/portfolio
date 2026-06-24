@@ -1,28 +1,30 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 
+const base = import.meta.env.BASE_URL;
+
 const caseStudies = [
   {
     slug: 'rume',
     title: 'Rume',
     description: 'A contemplative memory collection app.',
-    image: '/rume-thumb.png',
-    video: '/rume-flow.mov',
+    image: `${base}rume-thumb.png`,
+    video: `${base}rume-flow.mov`,
     hoverBg: '#000',
   },
   {
     slug: 'aether',
     title: 'Aether',
     description: 'An app that assesses social rhythm and provides mindful methods to benefit mental health.',
-    image: '/aether-bg.png',
-    gif: '/aether-flow.gif',
+    image: `${base}aether-bg.png`,
+    gif: `${base}aether-flow.gif`,
     hoverBg: '#fff',
   },
   {
     slug: 'greenroom',
     title: 'Greenroom',
     description: 'A concert logging app for live music lovers.',
-    image: '/greenroom-bg.png',
+    image: `${base}greenroom-bg.png`,
   },
 ];
 ---
@@ -31,13 +33,13 @@ const caseStudies = [
 
   <!-- Custom cursor -->
   <div class="custom-cursor" id="card-cursor" aria-hidden="true">
-    <img src="/cursor-card.png" alt="" />
+    <img src={`${base}cursor-card.png`} alt="" />
   </div>
 
   <!-- Cloud video — fixed behind everything -->
   <div class="cloud-bg" aria-hidden="true">
     <video autoplay muted loop playsinline>
-      <source src="/clouds.mp4" type="video/mp4" />
+      <source src={`${base}clouds.mp4`} type="video/mp4" />
     </video>
   </div>
 

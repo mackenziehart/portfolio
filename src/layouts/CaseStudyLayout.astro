@@ -1,0 +1,238 @@
+---
+import BaseLayout from './BaseLayout.astro';
+
+interface Props {
+  title: string;
+  subtitle: string;
+  category: string;
+  year: string;
+  description: string;
+  role?: string;
+  duration?: string;
+}
+
+const {
+  title,
+  subtitle,
+  category,
+  year,
+  description,
+  role = 'Product Designer',
+  duration,
+} = Astro.props;
+---
+
+<BaseLayout title={title} description={description}>
+  <article class="case-study">
+    <!-- Hero -->
+    <header class="case-hero container">
+      <div class="case-hero__eyebrow">
+        <span>{category}</span>
+        <span>{year}</span>
+      </div>
+      <h1>{title}</h1>
+      <p class="case-hero__subtitle">{subtitle}</p>
+
+      <dl class="case-meta">
+        <div>
+          <dt>Role</dt>
+          <dd>{role}</dd>
+        </div>
+        {duration && (
+          <div>
+            <dt>Duration</dt>
+            <dd>{duration}</dd>
+          </div>
+        )}
+      </dl>
+    </header>
+
+    <!-- Cover image placeholder -->
+    <div class="case-cover container">
+      <div class="case-cover__image" aria-label={`${title} cover image`}>
+        <span aria-hidden="true">{title}</span>
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div class="case-body container">
+      <slot />
+    </div>
+
+    <!-- Navigation -->
+    <nav class="case-nav container" aria-label="Case study navigation">
+      <a href="/" class="case-nav__back">← All work</a>
+    </nav>
+  </article>
+</BaseLayout>
+
+<style>
+  /* Hero */
+  .case-hero {
+    padding-block: var(--space-16) var(--space-12);
+    max-width: 900px;
+  }
+
+  .case-hero__eyebrow {
+    display: flex;
+    gap: var(--space-4);
+    font-size: var(--size-xs);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-ink-muted);
+    margin-bottom: var(--space-6);
+  }
+
+  .case-hero__eyebrow span + span::before {
+    content: '·';
+    margin-right: var(--space-4);
+  }
+
+  .case-hero h1 {
+    margin-bottom: var(--space-4);
+  }
+
+  .case-hero__subtitle {
+    font-size: var(--size-md);
+    color: var(--color-ink-muted);
+    max-width: 56ch;
+    margin-bottom: var(--space-10);
+  }
+
+  .case-meta {
+    display: flex;
+    gap: var(--space-12);
+  }
+
+  .case-meta div {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  .case-meta dt {
+    font-size: var(--size-xs);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-ink-muted);
+  }
+
+  .case-meta dd {
+    font-size: var(--size-sm);
+  }
+
+  /* Cover */
+  .case-cover {
+    margin-bottom: var(--space-16);
+  }
+
+  .case-cover__image {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background-color: var(--color-surface);
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-serif);
+    font-size: clamp(2rem, 6vw, 5rem);
+    color: var(--color-rule);
+    user-select: none;
+  }
+
+  /* Body */
+  .case-body {
+    max-width: 800px;
+
+    /* Typography for prose */
+    & h2 {
+      font-size: var(--size-xl);
+      margin-top: var(--space-16);
+      margin-bottom: var(--space-6);
+      padding-top: var(--space-8);
+      border-top: 4px dotted var(--color-rule);
+    }
+
+    & h3 {
+      font-size: var(--size-lg);
+      margin-top: var(--space-10);
+      margin-bottom: var(--space-4);
+    }
+
+    & p {
+      font-size: var(--size-md);
+      line-height: 1.75;
+      color: var(--color-ink);
+      margin-bottom: var(--space-4);
+    }
+
+    & ul, & ol {
+      list-style: revert;
+      padding-left: var(--space-6);
+      margin-bottom: var(--space-6);
+    }
+
+    & li {
+      font-size: var(--size-md);
+      line-height: 1.7;
+      margin-bottom: var(--space-2);
+      color: var(--color-ink);
+    }
+
+    & .image-block {
+      margin-block: var(--space-12);
+    }
+
+    & .image-block img,
+    & .image-placeholder {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      background-color: var(--color-surface);
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: var(--size-sm);
+      color: var(--color-ink-muted);
+      letter-spacing: 0.04em;
+    }
+
+    & figcaption {
+      margin-top: var(--space-3);
+      font-size: var(--size-sm);
+      color: var(--color-ink-muted);
+    }
+
+    & .callout {
+      margin-block: var(--space-12);
+      padding: var(--space-8);
+      background-color: var(--color-surface);
+      border-left: 3px solid var(--color-warm);
+      border-radius: 0 var(--radius) var(--radius) 0;
+    }
+
+    & .callout p {
+      font-family: var(--font-serif);
+      font-size: var(--size-lg);
+      font-style: italic;
+      color: var(--color-ink);
+      margin: 0;
+    }
+  }
+
+  /* Nav */
+  .case-nav {
+    padding-block: var(--space-16);
+    border-top: 4px dotted var(--color-rule);
+    margin-top: var(--space-24);
+  }
+
+  .case-nav__back {
+    font-size: var(--size-sm);
+    color: var(--color-ink-muted);
+    text-decoration: none;
+    transition: color var(--transition);
+  }
+
+  .case-nav__back:hover { color: var(--color-ink); }
+</style>

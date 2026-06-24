@@ -1,0 +1,53 @@
+---
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = 'Mackenzie Hart — Product Designer' } = Astro.props;
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL} />
+    <title>{title} — Mackenzie Hart</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cardo:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  </head>
+  <body>
+    <header>
+      <nav class="site-nav" aria-label="Site navigation">
+        <a href="/" class="site-nav__logo" aria-label="Home">
+          <img src="/heart.png" alt="" width="32" height="32" />
+          <span class="site-nav__name">Mackenzie Hart</span>
+        </a>
+        <ul class="site-nav__links" role="list">
+          <li><a href="/about" aria-current={Astro.url.pathname === '/about' ? 'page' : undefined}>About</a></li>
+          <li><a href="/resume.pdf" target="_blank" rel="noopener">Resume</a></li>
+          <li><a href="https://linkedin.com/in/mackenzie-hart" target="_blank" rel="noopener">LinkedIn</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main>
+      <slot />
+    </main>
+  </body>
+</html>
+
+<style is:global>
+  @import '../styles/global.css';
+</style>

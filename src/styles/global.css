@@ -54,7 +54,7 @@ body {
   color: var(--color-ink);
   font-family: var(--font-serif);
   font-size: var(--size-base);
-  line-height: 1.65;
+  line-height: 1.5;
   letter-spacing: 0.02em;
   min-height: 100dvh;
 }

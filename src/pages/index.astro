@@ -39,11 +39,12 @@ const caseStudies = [
     <span>View</span>
   </div>
 
-  <!-- Cloud video — fixed behind everything -->
+  <!-- Cloud video — fixed behind everything; canvas draws WebGL distortion on desktop -->
   <div class="cloud-bg" aria-hidden="true">
-    <video autoplay muted loop playsinline>
+    <video id="cloud-video" autoplay muted loop playsinline>
       <source src={`${b}clouds.mp4`} type="video/mp4" />
     </video>
+    <canvas id="cloud-canvas"></canvas>
   </div>
 
   <!-- Hero -->
@@ -142,6 +143,199 @@ const caseStudies = [
   });
 </script>
 
+<script>
+  // ── Cloud distortion effect (WebGL ping-pong displacement) ──
+  (function () {
+    const video  = document.getElementById('cloud-video') as HTMLVideoElement;
+    const canvas = document.getElementById('cloud-canvas') as HTMLCanvasElement;
+
+    // Mobile / touch-only: skip WebGL, show plain video
+    if (window.matchMedia('(hover: none)').matches) {
+      video.style.display = 'block';
+      canvas.style.display = 'none';
+      return;
+    }
+
+    const gl = canvas.getContext('webgl');
+    if (!gl) {
+      video.style.display = 'block';
+      canvas.style.display = 'none';
+      return;
+    }
+
+    // ── Shader helpers ──────────────────────────────────────
+    function mkShader(type: number, src: string) {
+      const s = gl.createShader(type)!;
+      gl.shaderSource(s, src);
+      gl.compileShader(s);
+      return s;
+    }
+    function mkProg(vs: string, fs: string) {
+      const p = gl.createProgram()!;
+      gl.attachShader(p, mkShader(gl.VERTEX_SHADER, vs));
+      gl.attachShader(p, mkShader(gl.FRAGMENT_SHADER, fs));
+      gl.linkProgram(p);
+      return p;
+    }
+
+    // ── Shaders ─────────────────────────────────────────────
+    const VS = `attribute vec2 a;varying vec2 v;void main(){v=a*.5+.5;gl_Position=vec4(a,0,1);}`;
+
+    // Pass 1: accumulate mouse velocity into displacement buffer, fade over time
+    const UPDATE_FS = `
+      precision mediump float;
+      uniform sampler2D uD;
+      uniform vec2 uM, uP;
+      uniform float uA;
+      varying vec2 v;
+      void main() {
+        vec2 d = texture2D(uD, v).rg * 2.0 - 1.0;
+        d *= 0.97;
+        vec2 diff = v - uM;
+        diff.x *= uA;
+        d += (uM - uP) * smoothstep(0.12, 0.0, length(diff)) * 6.0;
+        d = clamp(d, -0.49, 0.49);
+        gl_FragColor = vec4(d * 0.5 + 0.5, 0.0, 1.0);
+      }
+    `;
+
+    // Pass 2: sample video texture with displaced UVs
+    const DISPLAY_FS = `
+      precision mediump float;
+      uniform sampler2D uV, uD;
+      varying vec2 v;
+      void main() {
+        vec2 d = texture2D(uD, v).rg * 2.0 - 1.0;
+        gl_FragColor = texture2D(uV, v + d * 0.015);
+      }
+    `;
+
+    const updProg = mkProg(VS, UPDATE_FS);
+    const dspProg = mkProg(VS, DISPLAY_FS);
+
+    // ── Full-screen quad ─────────────────────────────────────
+    const quadBuf = gl.createBuffer()!;
+    gl.bindBuffer(gl.ARRAY_BUFFER, quadBuf);
+    gl.bufferData(gl.ARRAY_BUFFER,
+      new Float32Array([-1,-1, 1,-1, -1,1, -1,1, 1,-1, 1,1]),
+      gl.STATIC_DRAW);
+
+    const aUpd = gl.getAttribLocation(updProg, 'a');
+    const aDsp = gl.getAttribLocation(dspProg, 'a');
+    function bindQuad(loc: number) {
+      gl.bindBuffer(gl.ARRAY_BUFFER, quadBuf);
+      gl.enableVertexAttribArray(loc);
+      gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+    }
+
+    // ── Cache uniforms ───────────────────────────────────────
+    const uUpd = {
+      d: gl.getUniformLocation(updProg, 'uD'),
+      m: gl.getUniformLocation(updProg, 'uM'),
+      p: gl.getUniformLocation(updProg, 'uP'),
+      a: gl.getUniformLocation(updProg, 'uA'),
+    };
+    const uDsp = {
+      v: gl.getUniformLocation(dspProg, 'uV'),
+      d: gl.getUniformLocation(dspProg, 'uD'),
+    };
+
+    // ── Ping-pong displacement textures ──────────────────────
+    const DS = 512;
+    function mkDispTex() {
+      const t = gl.createTexture()!;
+      gl.bindTexture(gl.TEXTURE_2D, t);
+      // Fill with 0.5 = no displacement
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, DS, DS, 0, gl.RGBA, gl.UNSIGNED_BYTE,
+        new Uint8Array(DS * DS * 4).fill(128));
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      return t;
+    }
+    function mkFBO(t: WebGLTexture) {
+      const fb = gl.createFramebuffer()!;
+      gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+      gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, t, 0);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+      return fb;
+    }
+
+    const pp = [mkDispTex(), mkDispTex()].map(t => ({ t, fb: mkFBO(t) }));
+    let ri = 0;
+
+    // ── Video texture ────────────────────────────────────────
+    const vTex = gl.createTexture()!;
+    gl.bindTexture(gl.TEXTURE_2D, vTex);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE,
+      new Uint8Array([0, 0, 0, 255]));
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+    // ── Resize ───────────────────────────────────────────────
+    function resize() {
+      canvas.width  = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // ── Mouse tracking ───────────────────────────────────────
+    let mx = 0.5, my = 0.5, px = 0.5, py = 0.5, tx = 0.5, ty = 0.5;
+    window.addEventListener('mousemove', e => {
+      tx = e.clientX / window.innerWidth;
+      ty = 1.0 - e.clientY / window.innerHeight;
+    });
+
+    // ── Render loop ──────────────────────────────────────────
+    (function frame() {
+      requestAnimationFrame(frame);
+
+      px = mx; py = my;
+      mx = tx; my = ty;
+
+      // Upload current video frame as texture
+      if (video.readyState >= 2) {
+        gl.bindTexture(gl.TEXTURE_2D, vTex);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, video);
+      }
+
+      const wi = 1 - ri;
+
+      // Pass 1 — update displacement field
+      gl.useProgram(updProg);
+      gl.viewport(0, 0, DS, DS);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, pp[wi].fb);
+      gl.activeTexture(gl.TEXTURE0);
+      gl.bindTexture(gl.TEXTURE_2D, pp[ri].t);
+      gl.uniform1i(uUpd.d, 0);
+      gl.uniform2f(uUpd.m, mx, my);
+      gl.uniform2f(uUpd.p, px, py);
+      gl.uniform1f(uUpd.a, canvas.width / canvas.height);
+      bindQuad(aUpd);
+      gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+      // Pass 2 — render distorted video to screen
+      gl.useProgram(dspProg);
+      gl.viewport(0, 0, canvas.width, canvas.height);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+      gl.activeTexture(gl.TEXTURE0);
+      gl.bindTexture(gl.TEXTURE_2D, vTex);
+      gl.uniform1i(uDsp.v, 0);
+      gl.activeTexture(gl.TEXTURE1);
+      gl.bindTexture(gl.TEXTURE_2D, pp[wi].t);
+      gl.uniform1i(uDsp.d, 1);
+      bindQuad(aDsp);
+      gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+      ri = wi;
+    })();
+  })();
+</script>
+
 <style>
   /* ── Custom cursor ──────────────────────────────────── */
   .custom-cursor {
@@ -176,10 +370,19 @@ const caseStudies = [
     z-index: 0;
   }
 
-  .cloud-bg video {
+  /* Video is hidden — used only as WebGL texture source.
+     JS un-hides it on mobile/no-WebGL fallback. */
+  #cloud-video {
+    display: none;
     width: 100%;
     height: 100%;
     object-fit: cover;
+  }
+
+  #cloud-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
   }
 
   /* ── Hero ───────────────────────────────────────────── */

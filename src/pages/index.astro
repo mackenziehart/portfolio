@@ -193,7 +193,7 @@ const caseStudies = [
         d *= 0.97;
         vec2 diff = v - uM;
         diff.x *= uA;
-        d += (uM - uP) * smoothstep(0.12, 0.0, length(diff)) * 6.0;
+        d += (uM - uP) * smoothstep(0.12, 0.0, length(diff)) * 12.0;
         d = clamp(d, -0.49, 0.49);
         gl_FragColor = vec4(d * 0.5 + 0.5, 0.0, 1.0);
       }
@@ -206,7 +206,7 @@ const caseStudies = [
       varying vec2 v;
       void main() {
         vec2 d = texture2D(uD, v).rg * 2.0 - 1.0;
-        gl_FragColor = texture2D(uV, v + d * 0.015);
+        gl_FragColor = texture2D(uV, v + d * 0.030);
       }
     `;
 

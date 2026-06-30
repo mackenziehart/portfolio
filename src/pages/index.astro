@@ -33,7 +33,7 @@ const caseStudies = [
 
   <!-- Custom cursor -->
   <div class="custom-cursor" id="card-cursor" aria-hidden="true">
-    <img src={`${b}cursor-card.png`} alt="" />
+    <span>View</span>
   </div>
 
   <!-- Cloud video — fixed behind everything -->
@@ -143,20 +143,21 @@ const caseStudies = [
     position: fixed;
     top: 0;
     left: 0;
-    width: 80px;
-    height: 80px;
     pointer-events: none;
     z-index: 999;
     opacity: 0;
     transition: opacity 300ms ease;
     transform: translate(-50%, -50%);
-    font-size: 14px;
-  }
-
-  .custom-cursor img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.75);
+    padding: 8px 14px;
+    border-radius: 100px;
+    white-space: nowrap;
+    backdrop-filter: blur(4px);
   }
 
   .custom-cursor.visible {

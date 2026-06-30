@@ -39,16 +39,17 @@ const caseStudies = [
     <span>View</span>
   </div>
 
-  <!-- Cloud video — fixed behind everything; canvas draws WebGL distortion on desktop -->
-  <div class="cloud-bg" aria-hidden="true">
-    <video id="cloud-video" autoplay muted loop playsinline>
-      <source src={`${b}clouds.mp4`} type="video/mp4" />
-    </video>
-    <canvas id="cloud-canvas"></canvas>
-  </div>
-
   <!-- Hero -->
   <section class="hero" aria-label="Introduction">
+
+    <!-- Cloud video lives inside the hero so it scrolls away naturally -->
+    <div class="cloud-bg" aria-hidden="true">
+      <video id="cloud-video" autoplay muted loop playsinline>
+        <source src={`${b}clouds.mp4`} type="video/mp4" />
+      </video>
+      <canvas id="cloud-canvas"></canvas>
+    </div>
+
     <div class="hero__text">
       <p class="hero__line hero__line--default">
         Mackenzie Hart is a <em>product<br />designer</em> in San Francisco.
@@ -58,9 +59,10 @@ const caseStudies = [
         <em>obsessed</em> with all of the <em>little details</em>
       </p>
     </div>
+
   </section>
 
-  <!-- Work — white section that scrolls over the video -->
+  <!-- Work -->
   <section class="work" aria-label="Case studies">
     <ol class="case-grid" role="list">
       {caseStudies.map((cs) => (
@@ -277,17 +279,18 @@ const caseStudies = [
 
     // ── Resize ───────────────────────────────────────────────
     function resize() {
-      canvas.width  = window.innerWidth;
-      canvas.height = window.innerHeight;
+      canvas.width  = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
     }
     window.addEventListener('resize', resize);
     resize();
 
-    // ── Mouse tracking ───────────────────────────────────────
+    // ── Mouse tracking (canvas-relative UVs) ─────────────────
     let mx = 0.5, my = 0.5, px = 0.5, py = 0.5, tx = 0.5, ty = 0.5;
     window.addEventListener('mousemove', e => {
-      tx = e.clientX / window.innerWidth;
-      ty = 1.0 - e.clientY / window.innerHeight;
+      const r = canvas.getBoundingClientRect();
+      tx = (e.clientX - r.left) / r.width;
+      ty = 1.0 - (e.clientY - r.top) / r.height;
     });
 
     // ── Render loop ──────────────────────────────────────────
@@ -365,7 +368,7 @@ const caseStudies = [
 
   /* ── Cloud bg ───────────────────────────────────────── */
   .cloud-bg {
-    position: fixed;
+    position: absolute;
     inset: 2rem 8vw;
     z-index: 0;
     border-radius: 40px;
@@ -385,20 +388,22 @@ const caseStudies = [
     display: block;
     width: 100%;
     height: 100%;
+    border-radius: 40px;
   }
 
   /* ── Hero ───────────────────────────────────────────── */
   .hero {
     position: relative;
-    z-index: 1;
     height: 100svh;
     display: flex;
     align-items: flex-end;
     padding: 0 var(--space-16) var(--space-16);
+    overflow: hidden;
   }
 
   .hero__text {
     position: relative;
+    z-index: 1;
     cursor: default;
   }
 

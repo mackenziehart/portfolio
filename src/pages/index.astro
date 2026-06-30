@@ -11,6 +11,7 @@ const caseStudies = [
     image: `${b}rume-thumb.png`,
     video: `${b}rume-flow.mov`,
     hoverBg: '#000',
+    cursorText: 'View case study',
   },
   {
     slug: 'aether',
@@ -19,12 +20,14 @@ const caseStudies = [
     image: `${b}aether-bg.png`,
     gif: `${b}aether-flow.gif`,
     hoverBg: '#fff',
+    cursorText: 'Case study coming soon',
   },
   {
     slug: 'greenroom',
     title: 'Greenroom',
     description: 'A concert logging app for live music lovers.',
     image: `${b}greenroom-bg.png`,
+    cursorText: 'Case study coming soon',
   },
 ];
 ---
@@ -61,7 +64,7 @@ const caseStudies = [
     <ol class="case-grid" role="list">
       {caseStudies.map((cs) => (
         <li class={`case-card case-card--${cs.slug}`}>
-          <div class="case-link" data-hover-bg={cs.hoverBg}>
+          <div class="case-link" data-hover-bg={cs.hoverBg} data-cursor-text={cs.cursorText}>
             <div class="case-thumb" aria-hidden="true">
               {cs.image
                 ? <img src={cs.image} alt={cs.title} class="case-thumb__img" />
@@ -124,6 +127,8 @@ const caseStudies = [
     link.addEventListener('mouseenter', () => {
       cursor.classList.add('visible');
       el.style.cursor = 'none';
+      const cursorSpan = cursor.querySelector('span');
+      if (cursorSpan && el.dataset.cursorText) cursorSpan.textContent = el.dataset.cursorText;
       if (hoverBg && thumb) thumb.style.backgroundColor = hoverBg;
       if (video) video.play();
       if (gif) { const s = gif.src; gif.src = ''; gif.src = s; }
@@ -150,14 +155,14 @@ const caseStudies = [
     transform: translate(-50%, -50%);
     font-family: var(--font-mono);
     font-size: 13px;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
     color: #fff;
-    background: rgba(0, 0, 0, 0.75);
+    background: rgba(0, 0, 0, 0.5);
+    border: 2px dotted rgba(255, 255, 255, 0.8);
     padding: 8px 14px;
     border-radius: 100px;
     white-space: nowrap;
-    backdrop-filter: blur(4px);
   }
 
   .custom-cursor.visible {

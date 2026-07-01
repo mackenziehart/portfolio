@@ -50,15 +50,9 @@ const caseStudies = [
       <canvas id="cloud-canvas"></canvas>
     </div>
 
-    <div class="hero__text">
-      <p class="hero__line hero__line--default">
-        Mackenzie Hart is a <em>product<br />designer</em> in San Francisco.
-      </p>
-      <p class="hero__line hero__line--hover" aria-hidden="true">
-        Storyteller, life&#8209;<em>romanticizer</em>, and<br />
-        <em>obsessed</em> with all of the <em>little details</em>
-      </p>
-    </div>
+    <img src={`${b}hero-scrap-1.png`} class="hero-scrap hero-scrap-1" alt="Mackenzie is an interaction designer in San Francisco." />
+    <img src={`${b}hero-scrap-2.png`} class="hero-scrap hero-scrap-2" alt="Storyteller, psychology nerd, and obsessed with all of the little details!" />
+    <img src={`${b}pressed-sf-penny.png`} class="hero-penny" alt="" aria-hidden="true" />
 
   </section>
 
@@ -395,52 +389,38 @@ const caseStudies = [
   .hero {
     position: relative;
     height: 81vh;
-    display: flex;
-    align-items: flex-end;
-    padding: 0 var(--space-16) var(--space-16);
     overflow: hidden;
   }
 
-  .hero__text {
-    position: relative;
-    z-index: 1;
-    cursor: default;
-  }
-
-  .hero__line {
-    font-family: var(--font-serif);
-    font-size: clamp(2rem, 4.5vw, 3.5rem);
-    font-weight: 400;
-    line-height: 1.15;
-    color: var(--color-ink-dark);
-    max-width: none;
-    transition: opacity 300ms ease;
-    background: rgba(255, 255, 255, 0.18);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-    padding: 0.75rem 1.25rem;
-    border-radius: 12px;
-    width: fit-content;
-  }
-
-  .hero__line em {
-    font-style: italic;
-  }
-
-  .hero__line--hover {
+  .hero-scrap,
+  .hero-penny {
     position: absolute;
-    top: 0;
-    left: 0;
-    opacity: 0;
-    white-space: nowrap;
+    pointer-events: none;
+    user-select: none;
   }
 
-  .hero__text:hover .hero__line--default {
-    opacity: 0;
+  .hero-scrap-1 {
+    width: 36%;
+    left: 22%;
+    top: 16%;
+    transform: rotate(-8deg);
+    z-index: 2;
   }
 
-  .hero__text:hover .hero__line--hover {
-    opacity: 1;
+  .hero-scrap-2 {
+    width: 28%;
+    right: 16%;
+    top: 22%;
+    transform: rotate(5deg);
+    z-index: 2;
+  }
+
+  .hero-penny {
+    width: 16%;
+    left: 40%;
+    top: 50%;
+    transform: rotate(-4deg);
+    z-index: 3;
   }
 
   /* ── Work section ───────────────────────────────────── */

@@ -50,9 +50,11 @@ const caseStudies = [
       <canvas id="cloud-canvas"></canvas>
     </div>
 
-    <img src={`${b}hero-scrap-1.png`} class="hero-scrap hero-scrap-1" alt="Mackenzie is an interaction designer in San Francisco." />
-    <img src={`${b}hero-scrap-2.png`} class="hero-scrap hero-scrap-2" alt="Storyteller, psychology nerd, and obsessed with all of the little details!" />
-    <img src={`${b}pressed-sf-penny.png`} class="hero-penny" alt="" aria-hidden="true" />
+    <div class="hero-stage">
+      <img src={`${b}hero-scrap-1.png`} class="hero-scrap hero-scrap-1" alt="Mackenzie is an interaction designer in San Francisco." />
+      <img src={`${b}hero-scrap-2.png`} class="hero-scrap hero-scrap-2" alt="Storyteller, psychology nerd, and obsessed with all of the little details!" />
+      <img src={`${b}pressed-sf-penny.png`} class="hero-penny" alt="" aria-hidden="true" />
+    </div>
 
   </section>
 
@@ -392,6 +394,16 @@ const caseStudies = [
     overflow: hidden;
   }
 
+  /* Stage is always centered in the hero; items are relative to it */
+  .hero-stage {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 52vw;
+    height: 26vw;
+  }
+
   .hero-scrap,
   .hero-penny {
     position: absolute;
@@ -401,32 +413,33 @@ const caseStudies = [
 
   .hero-scrap-1 {
     width: 30.8vw;
-    left: 26vw;
-    top: 13vw;
+    left: 0;
+    top: 0;
     transform: rotate(4deg);
     z-index: 3;
   }
 
   .hero-scrap-2 {
     width: 24vw;
-    left: 52vw;
-    top: 16vw;
+    left: 26vw;
+    top: 3vw;
     transform: rotate(5deg);
     z-index: 2;
   }
 
   .hero-penny {
     width: 22vw;
-    left: 32vw;
-    top: 22vw;
+    left: 6vw;
+    top: 10vw;
     transform: rotate(3deg);
     z-index: 4;
   }
 
   @media (max-width: 640px) {
-    .hero-scrap-1 { width: 55vw; left: 5vw;  top: 18vw; }
-    .hero-scrap-2 { width: 44vw; left: 50vw; top: 26vw; }
-    .hero-penny   { width: 30vw; left: 5vw;  top: 55vw; }
+    .hero-stage   { width: 90vw; height: 60vw; }
+    .hero-scrap-1 { width: 55vw; left: 0;     top: 0; }
+    .hero-scrap-2 { width: 44vw; left: 44vw;  top: 6vw; }
+    .hero-penny   { width: 30vw; left: 8vw;   top: 28vw; }
   }
 
   /* ── Work section ───────────────────────────────────── */

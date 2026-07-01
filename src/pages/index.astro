@@ -400,27 +400,33 @@ const caseStudies = [
   }
 
   .hero-scrap-1 {
-    width: 30.8%;
-    left: 34%;
-    top: 20%;
-    transform: rotate(3deg);
+    width: 30.8vw;
+    left: 26vw;
+    top: 13vw;
+    transform: rotate(4deg);
     z-index: 3;
   }
 
   .hero-scrap-2 {
-    width: 24%;
-    left: 52%;
-    top: 27%;
+    width: 24vw;
+    left: 52vw;
+    top: 16vw;
     transform: rotate(5deg);
     z-index: 2;
   }
 
   .hero-penny {
-    width: 17%;
-    left: 20%;
-    top: 48%;
-    transform: rotate(-3deg);
+    width: 22vw;
+    left: 32vw;
+    top: 22vw;
+    transform: rotate(3deg);
     z-index: 4;
+  }
+
+  @media (max-width: 640px) {
+    .hero-scrap-1 { width: 55vw; left: 5vw;  top: 18vw; }
+    .hero-scrap-2 { width: 44vw; left: 50vw; top: 26vw; }
+    .hero-penny   { width: 30vw; left: 5vw;  top: 55vw; }
   }
 
   /* ── Work section ───────────────────────────────────── */
